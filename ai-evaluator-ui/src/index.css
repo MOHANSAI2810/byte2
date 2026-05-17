@@ -1,0 +1,151 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --text-main: #ffffff;
+  --text-dim: #b8c1ec;
+  --accent-cyan: #4ce1ff;
+  --accent-blue: #2a6dff;
+  --accent-magenta: #d866ff;
+  --panel-bg: rgba(255, 255, 255, 0.05);
+  --panel-border: rgba(255, 255, 255, 0.4);
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background-color: #0b0d17;
+  color: var(--text-main);
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, .outfit {
+  font-family: 'Outfit', sans-serif;
+}
+
+/* Base App Wrappers */
+.glass-bg-base {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -2;
+  background: #0b0d17 url('./assets/premium_stars_bg.png') no-repeat center center;
+  background-size: cover;
+}
+
+.glass-bg-glow {
+  position: fixed;
+  top: -20vh;
+  left: -20vw;
+  width: 140vw;
+  height: 140vh;
+  z-index: -1;
+  background: 
+    radial-gradient(circle at 15% 50%, rgba(180, 80, 255, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 85% 30%, rgba(76, 225, 255, 0.15) 0%, transparent 40%);
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+/* Ultra Premium Glass Panels */
+.glass-card-premium {
+  position: relative;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.02) 100%);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    inset 0 1px 1px rgba(255, 255, 255, 0.4),
+    0 30px 60px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+/* To simulate a glossy top edge */
+.glass-card-premium::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.6), rgba(255,255,255,0));
+  z-index: 1;
+}
+
+/* Secondary nested glass panels */
+.glass-card-inner {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+/* Typography Enhancements */
+.text-gradient {
+  background: linear-gradient(to right, #ffffff, #b8c1ec);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-blue {
+  background: linear-gradient(135deg, #4ce1ff, #d866ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Buttons */
+.btn-premium-primary {
+  background: linear-gradient(to right, #2a6dff, #4ce1ff);
+  color: #fff;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 40px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(42, 109, 255, 0.5), inset 0 1px 0 rgba(255,255,255,0.3);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-premium-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(42, 109, 255, 0.7), inset 0 1px 0 rgba(255,255,255,0.4);
+}
+
+.btn-premium-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  padding: 14px 32px;
+  border-radius: 40px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-premium-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Utilities for HUD/legacy compats to not break other views completely */
+.hud-card { @extend .glass-card-inner; }
+.hud-button { @extend .btn-premium-secondary; }
+.hud-border { border: 1px solid rgba(255,255,255,0.2) }

@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+
+*.egg-info/
+dist/
+.DS_Store
+uploads/
+
+venv/
+__pycache__/
+byte-vision-key.json
+node_modules/
