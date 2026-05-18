@@ -4,7 +4,7 @@ from typing import List, Optional
 from utils.database import supabase
 from utils.auth import get_current_user
 from services.ocr import extract_text_from_multiple_files
-from openai import OpenAI
+import google.generativeai as genai
 import os, json
 from dotenv import load_dotenv
 
@@ -12,11 +12,12 @@ load_dotenv()
 
 router = APIRouter()
 
-client = OpenAI(
-    api_key=os.getenv("DEEPSEEK_API_KEY"),
-    base_url="https://api.deepseek.com/v1"
-)
-MODEL = "deepseek-chat"
+# Configure Gemini
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyCPq7PTGD0b-CGFqlHmCZbOBSW3AFh1a58")
+genai.configure(api_key=GEMINI_API_KEY)
+
+MODEL_NAME = "gemini-2.5-flash"
+
 
 # ── Models ───────────────────────────────────────────────────
 
@@ -107,12 +108,17 @@ Rules:
 - max_marks should match what is written in the question paper
 - Return ONLY the JSON array, nothing else
 """
-    response = client.chat.completions.create(
-        model=MODEL,
-        messages=[{"role": "user", "content": prompt}],
-        max_tokens=4000
+    
+    model = genai.GenerativeModel(MODEL_NAME)
+    response = model.generate_content(
+        prompt,
+        generation_config={
+            "max_output_tokens": 4000,
+            "temperature": 0.1,
+        }
     )
-    raw = response.choices[0].message.content
+    
+    raw = response.text
     cleaned = raw.replace("```json", "").replace("```", "").strip()
 
     try:

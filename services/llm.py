@@ -1,41 +1,45 @@
 import os
 import json
-from openai import OpenAI
+import google.generativeai as genai
 from dotenv import load_dotenv
 
 from utils.prompts import get_grading_prompt, get_regrade_prompt
 
 load_dotenv()
 
-# Switch from Groq to DeepSeek
-client = OpenAI(
-    api_key=os.getenv("DEEPSEEK_API_KEY"),
-    base_url="https://api.deepseek.com/v1"
-)
+# Configure Gemini
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyCPq7PTGD0b-CGFqlHmCZbOBSW3AFh1a58")
+genai.configure(api_key=GEMINI_API_KEY)
 
-MODEL = "deepseek-chat"  # Options: "deepseek-chat", "deepseek-coder"
+MODEL_NAME = 'gemini-2.5-flash'  # or 'gemini-1.5-pro' for better quality
+# Available models: gemini-1.5-flash, gemini-1.5-pro, gemini-2.0-flash-exp
 
 
 def _call_llm(prompt: str, max_tokens: int = 4000):
-    response = client.chat.completions.create(
-        model=MODEL,
-        messages=[{"role": "user", "content": prompt}],
-        max_tokens=max_tokens,
-        temperature=0.3  # Lower temperature for more consistent grading
+    """Call Gemini API with the given prompt."""
+    model = genai.GenerativeModel(MODEL_NAME)
+    
+    response = model.generate_content(
+        prompt,
+        generation_config={
+            "max_output_tokens": max_tokens,
+            "temperature": 0.1,  # Low temperature for consistent grading
+            "top_p": 0.95,
+        }
     )
-    return response.choices[0].message.content
+    
+    # Handle response
+    if response.text:
+        return response.text
+    elif response.prompt_feedback:
+        raise Exception(f"Prompt blocked: {response.prompt_feedback}")
+    else:
+        raise Exception("No response from Gemini")
 
 
 def _parse_json(raw: str) -> dict:
     try:
-        # Remove markdown code blocks if present
         cleaned = raw.replace("```json", "").replace("```", "").strip()
-        # DeepSeek sometimes adds extra text before/after JSON
-        # Try to find JSON object in the response
-        start_idx = cleaned.find('{')
-        end_idx = cleaned.rfind('}') + 1
-        if start_idx != -1 and end_idx > start_idx:
-            cleaned = cleaned[start_idx:end_idx]
         return json.loads(cleaned)
     except json.JSONDecodeError:
         return {
@@ -74,6 +78,15 @@ def grade_paper(
         result["percentage"] = round(
             (result["total_score"] / result["max_score"]) * 100, 1
         )
+    else:
+        # Fallback: calculate from score_breakdown if available
+        breakdown = result.get("score_breakdown", [])
+        if breakdown:
+            total = sum(q.get("score", 0) for q in breakdown)
+            max_score = sum(q.get("max_marks", 0) for q in breakdown)
+            result["total_score"] = total
+            result["max_score"] = max_score
+            result["percentage"] = round((total / max_score) * 100, 1) if max_score > 0 else 0
 
     return result
 
