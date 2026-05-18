@@ -5,10 +5,6 @@ import pdfplumber
 from PIL import Image
 from typing import List
 from fastapi import UploadFile
-from dotenv import load_dotenv
-
-# Force load .env file at the beginning
-load_dotenv(override=True)
 
 # Google Cloud Vision setup
 VISION_AVAILABLE = False
@@ -18,9 +14,6 @@ try:
     from google.cloud import vision as gvision
     from google.oauth2 import service_account
     
-    # Debug: Print all available env vars (remove in production)
-    print("Looking for credentials in environment variables...")
-    
     # Try multiple environment variable names
     creds_json = None
     env_names = ["GOOGLE_VISION_CREDENTIALS", "GOOGLE_CREDENTIALS", "VISION_CREDENTIALS", "GOOGLE_APPLICATION_CREDENTIALS_JSON"]
@@ -29,8 +22,6 @@ try:
         creds_json = os.getenv(env_name)
         if creds_json:
             print(f"✅ Found credentials in {env_name}")
-            # Print first 100 chars to verify
-            print(f"Credentials preview: {creds_json[:100]}...")
             break
     
     if creds_json:
@@ -42,18 +33,16 @@ try:
         print("✅ Google Vision OCR initialized successfully")
     else:
         print("⚠️ No credentials found in any environment variable")
-        print(f"Available env vars: {[k for k in os.environ.keys() if 'VISION' in k or 'GOOGLE' in k]}")
+        print(f"Available env vars: {list(os.environ.keys())}")
         
-except ImportError as e:
-    print(f"⚠️ Google Cloud Vision not installed - run: pip install google-cloud-vision")
-    print(f"Import error: {e}")
+except ImportError:
+    print("⚠️ Google Cloud Vision not installed - run: pip install google-cloud-vision")
 except json.JSONDecodeError as e:
     print(f"⚠️ Invalid JSON in credentials: {e}")
-    print(f"Raw credentials: {creds_json[:200] if creds_json else 'None'}")
 except Exception as e:
     print(f"⚠️ Google Vision init error: {e}")
 
-# Rest of your functions remain the same...
+
 def extract_from_pdf(file_bytes: bytes) -> str:
     """Extract text from a typed/digital PDF."""
     text_parts = []
