@@ -10,3 +10,4 @@ venv/
 __pycache__/
 byte-vision-key.json
 node_modules/
+.env
