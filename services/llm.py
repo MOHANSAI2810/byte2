@@ -5,14 +5,16 @@ from dotenv import load_dotenv
 
 from utils.prompts import get_grading_prompt, get_regrade_prompt
 
-load_dotenv()
+load_dotenv(override=True)
 
-# Configure Gemini
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyCPq7PTGD0b-CGFqlHmCZbOBSW3AFh1a58")
+# Configure Gemini - ONLY from environment variable
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY not found in environment variables. Please set it in .env file.")
+
 genai.configure(api_key=GEMINI_API_KEY)
 
-MODEL_NAME = 'gemini-2.5-flash'  # or 'gemini-1.5-pro' for better quality
-# Available models: gemini-1.5-flash, gemini-1.5-pro, gemini-2.0-flash-exp
+MODEL_NAME = 'gemini-2.5-flash'
 
 
 def _call_llm(prompt: str, max_tokens: int = 4000):
@@ -23,12 +25,11 @@ def _call_llm(prompt: str, max_tokens: int = 4000):
         prompt,
         generation_config={
             "max_output_tokens": max_tokens,
-            "temperature": 0.1,  # Low temperature for consistent grading
+            "temperature": 0.1,
             "top_p": 0.95,
         }
     )
     
-    # Handle response
     if response.text:
         return response.text
     elif response.prompt_feedback:
@@ -79,7 +80,6 @@ def grade_paper(
             (result["total_score"] / result["max_score"]) * 100, 1
         )
     else:
-        # Fallback: calculate from score_breakdown if available
         breakdown = result.get("score_breakdown", [])
         if breakdown:
             total = sum(q.get("score", 0) for q in breakdown)

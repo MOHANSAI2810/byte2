@@ -12,12 +12,14 @@ load_dotenv()
 
 router = APIRouter()
 
-# Configure Gemini
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyCPq7PTGD0b-CGFqlHmCZbOBSW3AFh1a58")
+# Configure Gemini - ONLY from environment variable
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if not GEMINI_API_KEY:
+    raise HTTPException(status_code=500, detail="GEMINI_API_KEY not configured. Please set it in environment variables.")
+
 genai.configure(api_key=GEMINI_API_KEY)
 
 MODEL_NAME = "gemini-2.5-flash"
-
 
 # ── Models ───────────────────────────────────────────────────
 
